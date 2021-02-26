@@ -1,5 +1,5 @@
-% clear;
-% cla;
+clear;
+cla;
 %% main parametrs
 p = 5;
 m = 5;
@@ -15,6 +15,8 @@ joints_vel = zeros(1,6);
 joints_pos = zeros(1,6);
 joints_pos_last = zeros(1,6);
 Integral = zeros(1,p*n);
+
+
 %% Ie calculate
 Ie = I;
 for i = 2:m 
@@ -78,7 +80,7 @@ for i = 1:6
      
 end
 
-pause(0.3); 
+
 
 %% trajectory generation
 start_pos = [-0.385 0 0.9865];
@@ -113,15 +115,15 @@ for k = 1:len
 end
 
 
+% calculate_dynamic();
 %% main loop
 s = 1;
 while t < (len-p)
         
     timeStart = vrep.simxGetLastCmdTime(clientID);
-    
     for i = 1:n
         res = vrep.simxSetJointPosition(clientID, joints(i), Qd(i,t), vrep.simx_opmode_oneshot);          
-        [res joints_pos(i)] = vrep.simxGetJointPosition(clientID, joints(i), vrep.simx_opmode_buffer);                      
+        [res joints_pos(i)] = vrep.simxGetJointPosition(clientID, joints(i), vrep.simx_opmode_buffer);   
     end
     
     %calculate velocity
@@ -139,11 +141,15 @@ while t < (len-p)
     Ek_p = Qd_1(:,s:s+p*n-1)' - Ia*Qk - Ib*dQk + (Integral*Ki)';
     w = Kmpc*Ek_p;
     
-    %tau = M*w + h
-    
+%     tau = get_M(Qk)*w + get_C(Qk,dQk)*dQk + get_G(Qk)';
+%     for i = 1:n
+%         res = vrep.simxSetJointForce(clientID, joints(i), tau(i), vrep.simx_opmode_oneshot);           
+%     end
+
     s = s + n;
     t = t + 1;
     
+   
     pause(h);
     dt = (vrep.simxGetLastCmdTime(clientID)-timeStart)./1000;
 
